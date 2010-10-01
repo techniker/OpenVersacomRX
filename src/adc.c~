@@ -1,0 +1,72 @@
+/*
+   ####################################################################################
+   #                                                                                  #
+   #                       Cryptophon Vcodec Firmware V2.0.0                          #
+   #                                   ADC-Handler                                    #
+   #                                                                                  #
+   #    Copyright (C) 2008 Philipp Fabian Benedikt Maier (aka. Dexter)                #
+   #                                                                                  #
+   #    This program is free software; you can redistribute it and/or modify          #
+   #    it under the terms of the GNU General Public License as published by          #
+   #    the Free Software Foundation; either version 2 of the License, or             #
+   #    (at your option) any later version.                                           #
+   #                                                                                  #
+   #    This program is distributed in the hope that it will be useful,               #
+   #    but WITHOUT ANY WARRANTY; without even the implied warranty of                #
+   #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                 #
+   #    GNU General Public License for more details.                                  #
+   #                                                                                  #
+   #    You should have received a copy of the GNU General Public License             #
+   #    along with this program; if not, write to the Free Software                   #
+   #    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA    #
+   #                                                                                  #
+   #################################################################################### */
+
+
+/* ## HEADER ########################################################################## */
+#include <avr/io.h>					/* Include I/O definitions */
+#include "adc.h"					/* Include own header file */
+/* #################################################################################### */
+
+
+/* ## IMPLEMENTATION ################################################################## */
+/* Read out the analog-digital converter (Channel 0) */
+uint8_t systemReadAdc(void)
+{
+	uint8_t i;
+	uint32_t sample;
+
+	for(i=0;i<4;i++)					/* Do 4 samples */
+	{
+		ADCSRA |= (1<<ADSC);				/* Start Conversion */
+		while ( ADCSRA & (1<<ADSC) );			/* Wait for conversation completion */
+		sample += ADCW;
+	}
+
+	return (uint8_t)((sample/4) >> 2);			/* Hand back only the 8 highest bits */
+}
+
+/* Initalize the analog-digital converter */
+void systemInitAdc(void)
+{
+	ADMUX = 0;						/* Select ADC Channel #0 */
+//	ADMUX |= (1<<REFS1) | (1<<REFS0);			/* Use internal refecence voltage (2,56V) */
+ 
+	ADCSRA = (1<<ADPS1) | (1<<ADPS0);			/* Setup frequency prescaler */
+	ADCSRA |= (1<<ADEN);					/* Enable ADC */
+
+	return;
+}
+
+/* Select channel */
+void systemSelectChanAdc(uint8_t channel)
+{
+	while ( ADCSRA & (1<<ADSC) );	/* Make sure that an eventually running conversion has been completed */
+
+	ADMUX &= ~(0x1F);		/* Clear ADC Channel selector bits */
+	ADMUX |= (channel & 0x0F);	/* Set new ADC Channel bits */
+	return;
+}
+
+
+/* #################################################################################### */

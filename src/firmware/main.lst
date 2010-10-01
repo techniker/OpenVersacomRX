@@ -1,0 +1,66 @@
+   1               		.file	"main.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.global __do_copy_data
+   9               		.global __do_clear_bss
+  10               		.data
+  11               	.LC0:
+  12 0000 0D0A 0A0A 		.string	"\r\n\n\n\n\n\n\n\n\n\n"
+  12      0A0A 0A0A 
+  12      0A0A 0A00 
+  13               	.LC1:
+  14 000c 5275 6E64 		.string	"Rundsteuerrung Receiver (c)2010 Detxer\r"
+  14      7374 6575 
+  14      6572 7275 
+  14      6E67 2052 
+  14      6563 6569 
+  15               	.LC2:
+  16 0034 4461 7461 		.ascii	"Data f"
+  16      2066 
+  17 003a 6F72 6D61 		.string	"ormat is binary stream, please use external software to decode.\r"
+  17      7420 6973 
+  17      2062 696E 
+  17      6172 7920 
+  17      7374 7265 
+  18               		.text
+  19               	.global	main
+  21               	main:
+  22               	/* prologue: function */
+  23               	/* frame size = 0 */
+  24 0000 80E1      		ldi r24,lo8(16)
+  25 0002 90E0      		ldi r25,hi8(16)
+  26 0004 00D0      		rcall systemUartInit
+  27 0006 80E0      		ldi r24,lo8(.LC0)
+  28 0008 90E0      		ldi r25,hi8(.LC0)
+  29 000a 00D0      		rcall puts
+  30 000c 80E0      		ldi r24,lo8(.LC1)
+  31 000e 90E0      		ldi r25,hi8(.LC1)
+  32 0010 00D0      		rcall puts
+  33 0012 80E0      		ldi r24,lo8(.LC2)
+  34 0014 90E0      		ldi r25,hi8(.LC2)
+  35 0016 00D0      		rcall puts
+  36               	.L2:
+  37 0018 00D0      		rcall systemDcf39Receive
+  38 001a 00D0      		rcall systemUartTransmit
+  39 001c 00C0      		rjmp .L2
+DEFINED SYMBOLS
+                            *ABS*:00000000 main.c
+     /tmp/ccHdtCzw.s:2      *ABS*:0000003f __SREG__
+     /tmp/ccHdtCzw.s:3      *ABS*:0000003e __SP_H__
+     /tmp/ccHdtCzw.s:4      *ABS*:0000003d __SP_L__
+     /tmp/ccHdtCzw.s:5      *ABS*:00000034 __CCP__
+     /tmp/ccHdtCzw.s:6      *ABS*:00000000 __tmp_reg__
+     /tmp/ccHdtCzw.s:7      *ABS*:00000001 __zero_reg__
+     /tmp/ccHdtCzw.s:21     .text:00000000 main
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss
+systemUartInit
+puts
+systemDcf39Receive
+systemUartTransmit

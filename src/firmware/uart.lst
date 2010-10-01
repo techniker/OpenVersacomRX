@@ -1,0 +1,129 @@
+   1               		.file	"uart.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.global __do_copy_data
+   9               		.global __do_clear_bss
+  10               		.text
+  11               	.global	systemUartInit
+  13               	systemUartInit:
+  14               	/* prologue: function */
+  15               	/* frame size = 0 */
+  16 0000 20B5      		in r18,64-32
+  17 0002 2860      		ori r18,lo8(8)
+  18 0004 20BD      		out 64-32,r18
+  19 0006 20B5      		in r18,64-32
+  20 0008 20BD      		out 64-32,r18
+  21 000a 20B5      		in r18,64-32
+  22 000c 2460      		ori r18,lo8(4)
+  23 000e 20BD      		out 64-32,r18
+  24 0010 20B5      		in r18,64-32
+  25 0012 2260      		ori r18,lo8(2)
+  26 0014 20BD      		out 64-32,r18
+  27 0016 20B5      		in r18,64-32
+  28 0018 20BD      		out 64-32,r18
+  29 001a 20B5      		in r18,64-32
+  30 001c 20BD      		out 64-32,r18
+  31 001e 90BD      		out 64-32,r25
+  32 0020 89B9      		out 41-32,r24
+  33 0022 539A      		sbi 42-32,3
+  34 0024 549A      		sbi 42-32,4
+  35 0026 599A      		sbi 43-32,1
+  36 0028 80E0      		ldi r24,lo8(systemUartStdout)
+  37 002a 90E0      		ldi r25,hi8(systemUartStdout)
+  38 002c 9093 0000 		sts (__iob+2)+1,r25
+  39 0030 8093 0000 		sts __iob+2,r24
+  40               	/* epilogue start */
+  41 0034 0895      		ret
+  43               	.global	systemUartTransmit
+  45               	systemUartTransmit:
+  46               	/* prologue: function */
+  47               	/* frame size = 0 */
+  48 0036 E1E0      		ldi r30,lo8(1)
+  49 0038 F0E0      		ldi r31,hi8(1)
+  50               	/* #APP */
+  51               	 ;  105 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+  52 003a 3197      		1: sbiw r30,1
+  53 003c 01F4      		brne 1b
+  54               	 ;  0 "" 2
+  55               	/* #NOAPP */
+  56               	.L4:
+  57 003e 5D9B      		sbis 43-32,5
+  58 0040 00C0      		rjmp .L4
+  59 0042 8CB9      		out 44-32,r24
+  60               	/* epilogue start */
+  61 0044 0895      		ret
+  63               	.global	systemUartReceive
+  65               	systemUartReceive:
+  66               	/* prologue: function */
+  67               	/* frame size = 0 */
+  68               	.L8:
+  69 0046 5F9B      		sbis 43-32,7
+  70 0048 00C0      		rjmp .L8
+  71 004a 8CB1      		in r24,44-32
+  72               	/* epilogue start */
+  73 004c 0895      		ret
+  75               	.global	__vector_11
+  77               	__vector_11:
+  78 004e 1F92      		push __zero_reg__
+  79 0050 0F92      		push r0
+  80 0052 0FB6      		in r0,__SREG__
+  81 0054 0F92      		push r0
+  82 0056 1124      		clr __zero_reg__
+  83               	/* prologue: Signal */
+  84               	/* frame size = 0 */
+  85               	/* epilogue start */
+  86 0058 0F90      		pop r0
+  87 005a 0FBE      		out __SREG__,r0
+  88 005c 0F90      		pop r0
+  89 005e 1F90      		pop __zero_reg__
+  90 0060 1895      		reti
+  92               	.global	systemUartPutchar
+  94               	systemUartPutchar:
+  95               	/* prologue: function */
+  96               	/* frame size = 0 */
+  97 0062 E1E0      		ldi r30,lo8(1)
+  98 0064 F0E0      		ldi r31,hi8(1)
+  99               	/* #APP */
+ 100               	 ;  105 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+ 101 0066 3197      		1: sbiw r30,1
+ 102 0068 01F4      		brne 1b
+ 103               	 ;  0 "" 2
+ 104               	/* #NOAPP */
+ 105               	.L14:
+ 106 006a 5D9B      		sbis 43-32,5
+ 107 006c 00C0      		rjmp .L14
+ 108 006e 8CB9      		out 44-32,r24
+ 109 0070 80E0      		ldi r24,lo8(0)
+ 110               	/* epilogue start */
+ 111 0072 0895      		ret
+ 113               		.data
+ 116               	systemUartStdout:
+ 117 0000 0000 00   		.skip 3,0
+ 118 0003 02        		.byte	2
+ 119 0004 0000 0000 		.skip 4,0
+ 120 0008 0000      		.word	gs(systemUartPutchar)
+ 121 000a 0000      		.word	0
+ 122 000c 0000      		.word	0
+DEFINED SYMBOLS
+                            *ABS*:00000000 uart.c
+     /tmp/ccPiRbfy.s:2      *ABS*:0000003f __SREG__
+     /tmp/ccPiRbfy.s:3      *ABS*:0000003e __SP_H__
+     /tmp/ccPiRbfy.s:4      *ABS*:0000003d __SP_L__
+     /tmp/ccPiRbfy.s:5      *ABS*:00000034 __CCP__
+     /tmp/ccPiRbfy.s:6      *ABS*:00000000 __tmp_reg__
+     /tmp/ccPiRbfy.s:7      *ABS*:00000001 __zero_reg__
+     /tmp/ccPiRbfy.s:13     .text:00000000 systemUartInit
+     /tmp/ccPiRbfy.s:116    .data:00000000 systemUartStdout
+     /tmp/ccPiRbfy.s:45     .text:00000036 systemUartTransmit
+     /tmp/ccPiRbfy.s:65     .text:00000046 systemUartReceive
+     /tmp/ccPiRbfy.s:77     .text:0000004e __vector_11
+     /tmp/ccPiRbfy.s:94     .text:00000062 systemUartPutchar
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss
+__iob

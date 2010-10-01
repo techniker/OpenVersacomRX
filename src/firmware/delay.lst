@@ -1,0 +1,256 @@
+   1               		.file	"delay.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.global __do_copy_data
+   9               		.global __do_clear_bss
+  10               		.text
+  11               	.global	systemDelay1s
+  13               	systemDelay1s:
+  14               	/* prologue: function */
+  15               	/* frame size = 0 */
+  16 0000 20E4      		ldi r18,lo8(-25536)
+  17 0002 3CE9      		ldi r19,hi8(-25536)
+  18 0004 00C0      		rjmp .L2
+  19               	.L3:
+  20 0006 F901      		movw r30,r18
+  21               	/* #APP */
+  22               	 ;  105 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+  23 0008 3197      		1: sbiw r30,1
+  24 000a 01F4      		brne 1b
+  25               	 ;  0 "" 2
+  26               	/* #NOAPP */
+  27               	.L5:
+  28 000c 9150      		subi r25,1
+  29 000e 00F4      		brcc .L3
+  30 0010 8150      		subi r24,lo8(-(-1))
+  31               	.L2:
+  32 0012 8823      		tst r24
+  33 0014 01F0      		breq .L6
+  34 0016 94E6      		ldi r25,lo8(100)
+  35 0018 00C0      		rjmp .L5
+  36               	.L6:
+  37 001a 0895      		ret
+  39               	.global	systemDelay10ms
+  41               	systemDelay10ms:
+  42               	/* prologue: function */
+  43               	/* frame size = 0 */
+  44 001c 20E4      		ldi r18,lo8(-25536)
+  45 001e 3CE9      		ldi r19,hi8(-25536)
+  46 0020 00C0      		rjmp .L8
+  47               	.L9:
+  48 0022 F901      		movw r30,r18
+  49               	/* #APP */
+  50               	 ;  105 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+  51 0024 3197      		1: sbiw r30,1
+  52 0026 01F4      		brne 1b
+  53               	 ;  0 "" 2
+  54               	/* #NOAPP */
+  55 0028 8150      		subi r24,lo8(-(-1))
+  56               	.L8:
+  57 002a 8823      		tst r24
+  58 002c 01F4      		brne .L9
+  59               	/* epilogue start */
+  60 002e 0895      		ret
+  62               	.global	systemDelay100ms
+  64               	systemDelay100ms:
+  65               	/* prologue: function */
+  66               	/* frame size = 0 */
+  67 0030 20E4      		ldi r18,lo8(-25536)
+  68 0032 3CE9      		ldi r19,hi8(-25536)
+  69 0034 00C0      		rjmp .L12
+  70               	.L13:
+  71 0036 F901      		movw r30,r18
+  72               	/* #APP */
+  73               	 ;  105 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+  74 0038 3197      		1: sbiw r30,1
+  75 003a 01F4      		brne 1b
+  76               	 ;  0 "" 2
+  77               	/* #NOAPP */
+  78               	.L15:
+  79 003c 9150      		subi r25,1
+  80 003e 00F4      		brcc .L13
+  81 0040 8150      		subi r24,lo8(-(-1))
+  82               	.L12:
+  83 0042 8823      		tst r24
+  84 0044 01F0      		breq .L16
+  85 0046 9AE0      		ldi r25,lo8(10)
+  86 0048 00C0      		rjmp .L15
+  87               	.L16:
+  88 004a 0895      		ret
+  90               	.global	systemDelay1ms
+  92               	systemDelay1ms:
+  93               	/* prologue: function */
+  94               	/* frame size = 0 */
+  95 004c 20EA      		ldi r18,lo8(4000)
+  96 004e 3FE0      		ldi r19,hi8(4000)
+  97 0050 00C0      		rjmp .L18
+  98               	.L19:
+  99 0052 F901      		movw r30,r18
+ 100               	/* #APP */
+ 101               	 ;  105 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+ 102 0054 3197      		1: sbiw r30,1
+ 103 0056 01F4      		brne 1b
+ 104               	 ;  0 "" 2
+ 105               	/* #NOAPP */
+ 106 0058 8150      		subi r24,lo8(-(-1))
+ 107               	.L18:
+ 108 005a 8823      		tst r24
+ 109 005c 01F4      		brne .L19
+ 110               	/* epilogue start */
+ 111 005e 0895      		ret
+ 113               	.global	systemDelay10us
+ 115               	systemDelay10us:
+ 116               	/* prologue: function */
+ 117               	/* frame size = 0 */
+ 118 0060 25E3      		ldi r18,lo8(53)
+ 119 0062 00C0      		rjmp .L22
+ 120               	.L23:
+ 121 0064 922F      		mov r25,r18
+ 122               	/* #APP */
+ 123               	 ;  83 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+ 124 0066 9A95      		1: dec r25
+ 125 0068 01F4      		brne 1b
+ 126               	 ;  0 "" 2
+ 127               	/* #NOAPP */
+ 128 006a 8150      		subi r24,lo8(-(-1))
+ 129               	.L22:
+ 130 006c 8823      		tst r24
+ 131 006e 01F4      		brne .L23
+ 132               	/* epilogue start */
+ 133 0070 0895      		ret
+ 135               	.global	systemDelay100us
+ 137               	systemDelay100us:
+ 138               	/* prologue: function */
+ 139               	/* frame size = 0 */
+ 140 0072 35E3      		ldi r19,lo8(53)
+ 141 0074 00C0      		rjmp .L26
+ 142               	.L27:
+ 143 0076 232F      		mov r18,r19
+ 144               	/* #APP */
+ 145               	 ;  83 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+ 146 0078 2A95      		1: dec r18
+ 147 007a 01F4      		brne 1b
+ 148               	 ;  0 "" 2
+ 149               	/* #NOAPP */
+ 150               	.L29:
+ 151 007c 9150      		subi r25,1
+ 152 007e 00F4      		brcc .L27
+ 153 0080 8150      		subi r24,lo8(-(-1))
+ 154               	.L26:
+ 155 0082 8823      		tst r24
+ 156 0084 01F0      		breq .L30
+ 157 0086 9AE0      		ldi r25,lo8(10)
+ 158 0088 00C0      		rjmp .L29
+ 159               	.L30:
+ 160 008a 0895      		ret
+ 162               	.global	systemDelay1us
+ 164               	systemDelay1us:
+ 165               	/* prologue: function */
+ 166               	/* frame size = 0 */
+ 167 008c 25E0      		ldi r18,lo8(5)
+ 168 008e 00C0      		rjmp .L32
+ 169               	.L33:
+ 170 0090 922F      		mov r25,r18
+ 171               	/* #APP */
+ 172               	 ;  83 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+ 173 0092 9A95      		1: dec r25
+ 174 0094 01F4      		brne 1b
+ 175               	 ;  0 "" 2
+ 176               	/* #NOAPP */
+ 177 0096 8150      		subi r24,lo8(-(-1))
+ 178               	.L32:
+ 179 0098 8823      		tst r24
+ 180 009a 01F4      		brne .L33
+ 181               	/* epilogue start */
+ 182 009c 0895      		ret
+ 184               	.global	systemDelay05us
+ 186               	systemDelay05us:
+ 187               	/* prologue: function */
+ 188               	/* frame size = 0 */
+ 189 009e 22E0      		ldi r18,lo8(2)
+ 190 00a0 00C0      		rjmp .L36
+ 191               	.L37:
+ 192 00a2 922F      		mov r25,r18
+ 193               	/* #APP */
+ 194               	 ;  83 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+ 195 00a4 9A95      		1: dec r25
+ 196 00a6 01F4      		brne 1b
+ 197               	 ;  0 "" 2
+ 198               	/* #NOAPP */
+ 199 00a8 8150      		subi r24,lo8(-(-1))
+ 200               	.L36:
+ 201 00aa 8823      		tst r24
+ 202 00ac 01F4      		brne .L37
+ 203               	/* epilogue start */
+ 204 00ae 0895      		ret
+ 206               	.global	systemDelay01us
+ 208               	systemDelay01us:
+ 209               	/* prologue: function */
+ 210               	/* frame size = 0 */
+ 211 00b0 21E0      		ldi r18,lo8(1)
+ 212 00b2 00C0      		rjmp .L40
+ 213               	.L41:
+ 214 00b4 922F      		mov r25,r18
+ 215               	/* #APP */
+ 216               	 ;  83 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+ 217 00b6 9A95      		1: dec r25
+ 218 00b8 01F4      		brne 1b
+ 219               	 ;  0 "" 2
+ 220               	/* #NOAPP */
+ 221 00ba 8150      		subi r24,lo8(-(-1))
+ 222               	.L40:
+ 223 00bc 8823      		tst r24
+ 224 00be 01F4      		brne .L41
+ 225               	/* epilogue start */
+ 226 00c0 0895      		ret
+ 228               	.global	systemDelay16
+ 230               	systemDelay16:
+ 231               	/* prologue: function */
+ 232               	/* frame size = 0 */
+ 233               	/* #APP */
+ 234               	 ;  105 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+ 235 00c2 0197      		1: sbiw r24,1
+ 236 00c4 01F4      		brne 1b
+ 237               	 ;  0 "" 2
+ 238               	/* epilogue start */
+ 239               	/* #NOAPP */
+ 240 00c6 0895      		ret
+ 242               	.global	systemDelay8
+ 244               	systemDelay8:
+ 245               	/* prologue: function */
+ 246               	/* frame size = 0 */
+ 247               	/* #APP */
+ 248               	 ;  83 "/usr/lib/gcc/avr/4.3.2/../../../avr/include/util/delay_basic.h" 1
+ 249 00c8 8A95      		1: dec r24
+ 250 00ca 01F4      		brne 1b
+ 251               	 ;  0 "" 2
+ 252               	/* epilogue start */
+ 253               	/* #NOAPP */
+ 254 00cc 0895      		ret
+DEFINED SYMBOLS
+                            *ABS*:00000000 delay.c
+     /tmp/ccBWmoPG.s:2      *ABS*:0000003f __SREG__
+     /tmp/ccBWmoPG.s:3      *ABS*:0000003e __SP_H__
+     /tmp/ccBWmoPG.s:4      *ABS*:0000003d __SP_L__
+     /tmp/ccBWmoPG.s:5      *ABS*:00000034 __CCP__
+     /tmp/ccBWmoPG.s:6      *ABS*:00000000 __tmp_reg__
+     /tmp/ccBWmoPG.s:7      *ABS*:00000001 __zero_reg__
+     /tmp/ccBWmoPG.s:13     .text:00000000 systemDelay1s
+     /tmp/ccBWmoPG.s:41     .text:0000001c systemDelay10ms
+     /tmp/ccBWmoPG.s:64     .text:00000030 systemDelay100ms
+     /tmp/ccBWmoPG.s:92     .text:0000004c systemDelay1ms
+     /tmp/ccBWmoPG.s:115    .text:00000060 systemDelay10us
+     /tmp/ccBWmoPG.s:137    .text:00000072 systemDelay100us
+     /tmp/ccBWmoPG.s:164    .text:0000008c systemDelay1us
+     /tmp/ccBWmoPG.s:186    .text:0000009e systemDelay05us
+     /tmp/ccBWmoPG.s:208    .text:000000b0 systemDelay01us
+     /tmp/ccBWmoPG.s:230    .text:000000c2 systemDelay16
+     /tmp/ccBWmoPG.s:244    .text:000000c8 systemDelay8
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss

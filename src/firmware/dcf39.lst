@@ -1,0 +1,168 @@
+   1               		.file	"dcf39.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   8               		.global __do_copy_data
+   9               		.global __do_clear_bss
+  10               		.text
+  11               	.global	systemDcf39Receive
+  13               	systemDcf39Receive:
+  14 0000 5F92      		push r5
+  15 0002 6F92      		push r6
+  16 0004 7F92      		push r7
+  17 0006 8F92      		push r8
+  18 0008 9F92      		push r9
+  19 000a AF92      		push r10
+  20 000c BF92      		push r11
+  21 000e CF92      		push r12
+  22 0010 DF92      		push r13
+  23 0012 EF92      		push r14
+  24 0014 FF92      		push r15
+  25 0016 0F93      		push r16
+  26 0018 1F93      		push r17
+  27               	/* prologue: function */
+  28               	/* frame size = 0 */
+  29               	.L2:
+  30 001a 829B      		sbis 48-32,2
+  31 001c 00C0      		rjmp .L2
+  32 001e 82E3      		ldi r24,lo8(50)
+  33 0020 00D0      		rcall systemDelay100us
+  34 0022 89E1      		ldi r24,lo8(25)
+  35 0024 00D0      		rcall systemDelay100us
+  36 0026 10B3      		in r17,48-32
+  37 0028 82E3      		ldi r24,lo8(50)
+  38 002a 00D0      		rcall systemDelay100us
+  39 002c C0B2      		in r12,48-32
+  40 002e 82E3      		ldi r24,lo8(50)
+  41 0030 00D0      		rcall systemDelay100us
+  42 0032 50B2      		in r5,48-32
+  43 0034 82E3      		ldi r24,lo8(50)
+  44 0036 00D0      		rcall systemDelay100us
+  45 0038 E0B2      		in r14,48-32
+  46 003a 82E3      		ldi r24,lo8(50)
+  47 003c 00D0      		rcall systemDelay100us
+  48 003e A0B2      		in r10,48-32
+  49 0040 82E3      		ldi r24,lo8(50)
+  50 0042 00D0      		rcall systemDelay100us
+  51 0044 80B2      		in r8,48-32
+  52 0046 82E3      		ldi r24,lo8(50)
+  53 0048 00D0      		rcall systemDelay100us
+  54 004a 60B2      		in r6,48-32
+  55 004c 82E3      		ldi r24,lo8(50)
+  56 004e 00D0      		rcall systemDelay100us
+  57 0050 00B3      		in r16,48-32
+  58 0052 82E3      		ldi r24,lo8(50)
+  59 0054 00D0      		rcall systemDelay100us
+  60 0056 82E3      		ldi r24,lo8(50)
+  61 0058 00D0      		rcall systemDelay100us
+  62 005a 812F      		mov r24,r17
+  63 005c 90E0      		ldi r25,lo8(0)
+  64 005e 8095      		com r24
+  65 0060 9095      		com r25
+  66 0062 9595      		asr r25
+  67 0064 8795      		ror r24
+  68 0066 9595      		asr r25
+  69 0068 8795      		ror r24
+  70 006a 8170      		andi r24,lo8(1)
+  71 006c 10E0      		ldi r17,lo8(0)
+  72 006e 0095      		com r16
+  73 0070 1095      		com r17
+  74 0072 1595      		asr r17
+  75 0074 0795      		ror r16
+  76 0076 1595      		asr r17
+  77 0078 0795      		ror r16
+  78 007a 1695      		lsr r17
+  79 007c 102F      		mov r17,r16
+  80 007e 0027      		clr r16
+  81 0080 1795      		ror r17
+  82 0082 0795      		ror r16
+  83 0084 802B      		or r24,r16
+  84 0086 5094      		com r5
+  85 0088 94E0      		ldi r25,lo8(4)
+  86 008a 5922      		and r5,r25
+  87 008c 8529      		or r24,r5
+  88 008e DD24      		clr r13
+  89 0090 C094      		com r12
+  90 0092 D094      		com r13
+  91 0094 D694      		lsr r13
+  92 0096 C794      		ror r12
+  93 0098 92E0      		ldi r25,lo8(2)
+  94 009a C922      		and r12,r25
+  95 009c DD24      		clr r13
+  96 009e 8C29      		or r24,r12
+  97 00a0 FF24      		clr r15
+  98 00a2 E094      		com r14
+  99 00a4 F094      		com r15
+ 100 00a6 EE0C      		lsl r14
+ 101 00a8 FF1C      		rol r15
+ 102 00aa 98E0      		ldi r25,lo8(8)
+ 103 00ac E922      		and r14,r25
+ 104 00ae FF24      		clr r15
+ 105 00b0 8E29      		or r24,r14
+ 106 00b2 BB24      		clr r11
+ 107 00b4 A094      		com r10
+ 108 00b6 B094      		com r11
+ 109 00b8 AA0C      		lsl r10
+ 110 00ba BB1C      		rol r11
+ 111 00bc AA0C      		lsl r10
+ 112 00be BB1C      		rol r11
+ 113 00c0 90E1      		ldi r25,lo8(16)
+ 114 00c2 A922      		and r10,r25
+ 115 00c4 BB24      		clr r11
+ 116 00c6 8A29      		or r24,r10
+ 117 00c8 9924      		clr r9
+ 118 00ca 8094      		com r8
+ 119 00cc 9094      		com r9
+ 120 00ce 23E0      		ldi r18,3
+ 121 00d0 880C      	1:	lsl r8
+ 122 00d2 991C      		rol r9
+ 123 00d4 2A95      		dec r18
+ 124 00d6 01F4      		brne 1b
+ 125 00d8 90E2      		ldi r25,lo8(32)
+ 126 00da 8922      		and r8,r25
+ 127 00dc 9924      		clr r9
+ 128 00de 8829      		or r24,r8
+ 129 00e0 7724      		clr r7
+ 130 00e2 6094      		com r6
+ 131 00e4 7094      		com r7
+ 132 00e6 94E0      		ldi r25,4
+ 133 00e8 660C      	1:	lsl r6
+ 134 00ea 771C      		rol r7
+ 135 00ec 9A95      		dec r25
+ 136 00ee 01F4      		brne 1b
+ 137 00f0 90E4      		ldi r25,lo8(64)
+ 138 00f2 6922      		and r6,r25
+ 139 00f4 7724      		clr r7
+ 140 00f6 8629      		or r24,r6
+ 141               	/* epilogue start */
+ 142 00f8 1F91      		pop r17
+ 143 00fa 0F91      		pop r16
+ 144 00fc FF90      		pop r15
+ 145 00fe EF90      		pop r14
+ 146 0100 DF90      		pop r13
+ 147 0102 CF90      		pop r12
+ 148 0104 BF90      		pop r11
+ 149 0106 AF90      		pop r10
+ 150 0108 9F90      		pop r9
+ 151 010a 8F90      		pop r8
+ 152 010c 7F90      		pop r7
+ 153 010e 6F90      		pop r6
+ 154 0110 5F90      		pop r5
+ 155 0112 0895      		ret
+DEFINED SYMBOLS
+                            *ABS*:00000000 dcf39.c
+     /tmp/cc2S8omf.s:2      *ABS*:0000003f __SREG__
+     /tmp/cc2S8omf.s:3      *ABS*:0000003e __SP_H__
+     /tmp/cc2S8omf.s:4      *ABS*:0000003d __SP_L__
+     /tmp/cc2S8omf.s:5      *ABS*:00000034 __CCP__
+     /tmp/cc2S8omf.s:6      *ABS*:00000000 __tmp_reg__
+     /tmp/cc2S8omf.s:7      *ABS*:00000001 __zero_reg__
+     /tmp/cc2S8omf.s:13     .text:00000000 systemDcf39Receive
+
+UNDEFINED SYMBOLS
+__do_copy_data
+__do_clear_bss
+systemDelay100us
