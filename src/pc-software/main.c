@@ -32,121 +32,55 @@
 #include <ttybanana.h> 
 #include <toolbanana.h>
 #include <string.h>
+#include <getopt.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <libgen.h>
+#include <time.h>
+#include <libgen.h>
 
-/* Transmission parameters */
-#define DCF39_BAUDRATE 115200			/* Baudrate of the dcf39 receiver */
-#define DCF39_PORT "/dev/ttyUSB0"			/* Serial port - change if needed */
+#include "receive.h"
+#include "dcf39.h"
 
-#define DCF39_START 0x68				/* Start token used by DCF39 */
-#define DCF39_END 0x16					/* End token used by DCF39 */
-#define DCF39_TIMEOUT 30000 /* us */			/* Burst timeout */
-
-/* DCF39 frame as described in http://www.qru.de/dcf39-beacon.html */
-typedef struct
-{
-	char lField;
-	char cField;
-	char aField;
-	char ciField;
-	char userData[16];
-	int userDataLen;
-	char checkSum;
-} dcf39Frame;
-
-
+char programName[255];
 /* #################################################################################### */
 
-/* ## RECEIVE A FRAME WITH DCF39 DATA ############################################## */
-int dcf39Receive(dcf39Frame *data)
+/* #################################################################################### */
+void showUsage(void)
 {
-	char dataByte = 0;
-	char dataBurst[10000];
-	int i;
-
-	/* Detect beginning of a frame (0x68) */
-	do
-	{
-		dataByte = ttyGetchar(DCF39_PORT);
-	} while(dataByte != DCF39_START);
-
-	printf("   Received Startmark: %02hx\r\n",DCF39_START);
-
-	/* Read data burst */
-	ttyReadDynamic (DCF39_PORT, dataBurst, DCF39_TIMEOUT);
-
-	/* Verify L Field */
-	data->lField = dataBurst[0];
-	if(dataBurst[1] != data->lField)
-	{
-		printf(" * Error: L-Field mismatch! %02hhx is not equal to %02hhx\r\n", data->lField, dataBurst[1]);
-		printf(" * Buffer content (first 50 bytes) is:\r\n");
-		hexBinAsciiDump(dataBurst,50);
-		return -1;
-
-	}
-	else 
-		printf("   Received L-Field: %02hhx\r\n",data->lField);
-	
-	/* Check start mark */
-	if(dataBurst[2] != DCF39_START)
-	{
-		printf(" * Error: DCF39 Startmark %02hhx expected, received %02hhx\r\n",DCF39_END, dataBurst[2]);
-		printf(" * Buffer content (first 50 bytes) is:\r\n");
-		hexBinAsciiDump(dataBurst,50);
-		return -1;
-	}
-	else
-		printf("   Received Startmark: %02hhx\r\n",DCF39_START);
-
-	/* C,A and CI Field */
-	data->cField = dataBurst[3];
-	printf("   Received C-Field: %02hhx\r\n",data->cField);
-
-	data->aField = dataBurst[4];
-	printf("   Received A-Field: %02hhx\r\n",data->aField);
-
-	data->ciField = dataBurst[5];
-	printf("   Received CI-Field: %02hhx\r\n",data->ciField);
-
-
-	/* User data */
-	for(i=0;i<(data->lField-3);i++)
-	{
-		data->userData[i] = dataBurst[i+6];
-	}
-
-	data->userDataLen = data->lField-3;
-
-	printf("   Received User Data body:\r\n");
-	hexBinAsciiDump(data->userData, data->lField-3);
-	printf("   User data length is %i byte\r\n", data->userDataLen);
-
-	/* Checksum */
-	data->checkSum = dataBurst[i];
-
-	printf("   Received Checksum: %02hhx\r\n",data->checkSum);
-
-	/* Check end token */
-	if(dataBurst[i+6+1] != DCF39_END)
-	{
-		printf(" * Error: DCF39 Endmark %02hhx expected, received %02hhx\r\n",DCF39_END, dataBurst[i+6+1]);
-		printf(" * Buffer content (first 50 bytes) is:\r\n");
-		hexBinAsciiDump(dataBurst,50);
-		return -1;
-	}
-	else
-		printf("   Received Endmark: %02hx\r\n",DCF39_END);
-
-	return 0;
+	printf(" * Usage:\r\n");
+	printf("    %s -ris [ -p PORT] [ -l DATALOG] [ -e EVU-Address ]\r\n",programName);
+	printf("            -r) Dump raw data in the form |Time|Length|Data(hex)|\r\n");
+	printf("            -i) Ignore broadcast frames\r\n");
+	printf("            -s) Strict - Ignore all frames that are not DIN 19244 conform\r\n");
+	printf("            -p) Receive data from serial port (115200 Baud)\r\n");
+	printf("            -l) Receive/Write data from/to logfile.\r\n");
+	printf("            -e) Filter data by EVU-Address (e.g. -e FFFF)\r\n");
+	printf("\r\n");
 }
-/* #################################################################################### */
-
 
 /* Main program: Perform some testpages */
-int main(void)
+int main(int argc, char *argv[])
 {
+	char dcf39DataBurst[DCF39_MAXIMUM_BURSTLEN];
+	int dcf39DataBurstLen;
+	time_t frameTimeTimestamp;
+	struct tm *frameTime;
+	char timeAsString[100];
+	
+	int getoptOption;
+	char *getoptPort = 0;			/* serial port */
+	char *getoptDatalog = 0;		/* binary datalog */
+	int getoptRawdump = 0;
+	int getoptIgnoreBroadcast = 0;
+	int getoptIgnoreInvalid = 0;
+	char *getoptEVUAddress = 0;
 
-	dcf39Frame dcf39FrameData;		/* Data of the latest transmission */
+	unsigned int EVUAddressFilter = 0;
+	int ignoreData = 0;
+	dcf39Frame dcf39FrameData;
+
+	strcpy(programName,basename(argv[0]));
 
 	printf("_____________________________________________________________________________________________\n\r");
 	printf("DCF39 Receiver Copyright(c) Philipp Fabian Benedikt Maier\n\r");
@@ -154,48 +88,124 @@ int main(void)
 	printf("Note: This is an application that can decode dcf39 transmissions.\n\r");
 	printf("\n\r");
 
-	printf("Initalizing...\n\r");
+  	/* Parse Options */
+	while ((getoptOption = getopt (argc, argv, ":p:l:?hirse:")) != -1)
+		switch (getoptOption)
+		{
+			case 'r':
+				getoptRawdump = 1;
+			break;
+			case 'i':
+				getoptIgnoreBroadcast = 1;
+			break;
+			case 's':
+				getoptIgnoreInvalid = 1;
+			break;
+			case 'e':
+				getoptEVUAddress = optarg;
+			break;
+			case 'h':
+				showUsage();
+				return 0;
+			break;
+			case '?':
+				showUsage();
+				return 0;
+			break;
+			case 'p':
+				getoptPort = optarg;
+			break;
+			case 'l':
+				getoptDatalog = optarg;
+			break;
+		}
 
-	printf("* Opening serial port...\n\r");
-	ttyInitProf(DCF39_PORT,DCF39_BAUDRATE,8,NONE);		/* Initalize tty */
 
-	ttyClearBuffer(DCF39_PORT);					/* Clear buffer */
+	if(dcf39ReceiverInit(getoptPort,getoptDatalog) != 0)
+	{
+		printf(" * Error: Could not initalize receiver!\r\n");
+		return -1;
+	}
 
-	printf("* Serial port is set to %s at %i Baud - edit the sourcecode to alter this setting.\n\r",DCF39_PORT,DCF39_BAUDRATE);
-	printf("\n\r");
-
-
-
+	if(getoptEVUAddress)
+	{
+		sscanf(getoptEVUAddress, "%x", &EVUAddressFilter);
+		EVUAddressFilter &= 0xFFFF;
+		printf(" * Info: Will only display Frames that have EVU-Address %02hhx %02hhx.\r\n",EVUAddressFilter >> 8,EVUAddressFilter);
+	}
 
 	while(1)
 	{
-		printf(" * Waiting for frame...\n\r");
+		/* Receive frame */
+		dcf39DataBurstLen = dcf39ReceiveBurst(dcf39DataBurst,&frameTimeTimestamp);
+		if(dcf39DataBurstLen == -1)
+			return 0;
 
-		if(dcf39Receive(&dcf39FrameData) == 0)
+		frameTime = localtime(&frameTimeTimestamp);
+		sprintf(timeAsString, "%s", asctime(frameTime));
+		replaceChar(timeAsString, '\r' , 0, sizeof(timeAsString));
+		replaceChar(timeAsString, '\n' , 0, sizeof(timeAsString));
+
+		/* Ignore frames that do not begin with 0x86 */
+		if(dcf39Check(dcf39DataBurst) != 0)
 		{
-			printf(" * Frame ok!\r\n");
-
-
-
-			if(dcf39FrameData.userData[0] == 0)
-			{
-				printf(" * Time: %hhu:%hhu ",dcf39FrameData.userData[3],dcf39FrameData.userData[2]);
-				printf("  Date: %hhu.%hhu.%hhu \r\n",dcf39FrameData.userData[4]&0xF,dcf39FrameData.userData[5],dcf39FrameData.userData[6]);
-			}
-			
-			
-
-
-
-
-
-
+			if((dcf39DataBurst[0]&0xFF) != DCF39_START)
+				ignoreData = 1;
 		}
-		else
-			printf(" * Frame error!\r\n");
 
-		printf("\r\n");
+		/* Ignore broadcast frames */
+		if(getoptIgnoreBroadcast == 1)
+		{
+			if(((dcf39DataBurst[5]&0xFF) == 0x00)&&((dcf39DataBurst[6]&0xFF) == 0x00))
+				ignoreData = 1;
+			if(((dcf39DataBurst[5]&0xFF) == 0xFF)&&((dcf39DataBurst[6]&0xFF) == 0xFF))
+				ignoreData = 1;
+		}
 
+		/* Apply EVU-Address filter */
+		if(getoptEVUAddress)
+		{
+			if((dcf39DataBurst[5]&0xFF) != (EVUAddressFilter>>8)) 
+				ignoreData = 1;
+
+			if((dcf39DataBurst[6]&0xFF) != (EVUAddressFilter&0xFF)) 
+				ignoreData = 1;
+		}
+
+
+		/* Start data analysis */
+		if(ignoreData == 0)
+		{
+			if(getoptRawdump == 1)
+			{
+				printf("|%s|", timeAsString);
+				printf("%i|", dcf39DataBurstLen);
+
+				printfHex(dcf39DataBurst, dcf39DataBurstLen, ' ');
+
+				printf("|\r\n");
+			}
+			else
+			{
+				printf( " * Frame was received on: %s\r\n", timeAsString);
+			
+				if(dcf39Analyse(dcf39DataBurst, dcf39DataBurstLen, &dcf39FrameData) == 0)
+				{
+					printf(" * DCF39-Frame ok!\r\n");
+					if(dcf39FrameData.userData[0] == 0)
+					{
+						printf(" * Time: %hhu:%hhu ",dcf39FrameData.userData[3]&0x1F,dcf39FrameData.userData[2]);
+						printf("  Date: %hhu.%hhu.%hhu \r\n",dcf39FrameData.userData[4]&0x1F,dcf39FrameData.userData[5],dcf39FrameData.userData[6]);
+					}
+				}
+				else
+					printf(" * Unknown frame type?\r\n");
+
+				printf("\r\n");
+			}
+		}
+
+		ignoreData = 0;
 		fflush(stdout);
 	}
 
